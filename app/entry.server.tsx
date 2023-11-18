@@ -1,137 +1,128 @@
-/**
- * By default, Remix will handle generating the HTTP Response for you.
- * You are free to delete this file if you'd like to, but if you ever want it revealed again, you can run `npx remix reveal` ✨
- * For more information, see https://remix.run/file-conventions/entry.server
- */
+import { PassThrough } from "stream";
 
-import { PassThrough } from "node:stream";
-
+import createEmotionCache from "@emotion/cache";
+import { CacheProvider as EmotionCacheProvider } from "@emotion/react";
+import createEmotionServer from "@emotion/server/create-instance";
 import type { AppLoadContext, EntryContext } from "@remix-run/node";
-import { createReadableStreamFromReadable } from "@remix-run/node";
+import { Response } from "@remix-run/node";
 import { RemixServer } from "@remix-run/react";
 import isbot from "isbot";
 import { renderToPipeableStream } from "react-dom/server";
 
-const ABORT_DELAY = 5_000;
+const ABORT_DELAY = 5000;
 
-export default function handleRequest(
+const handleRequest = (
   request: Request,
   responseStatusCode: number,
   responseHeaders: Headers,
   remixContext: EntryContext,
-  loadContext: AppLoadContext
-) {
-  return isbot(request.headers.get("user-agent"))
+  loadContext: AppLoadContext,
+) =>
+  isbot(request.headers.get("user-agent"))
     ? handleBotRequest(
         request,
         responseStatusCode,
         responseHeaders,
-        remixContext
+        remixContext,
       )
     : handleBrowserRequest(
         request,
         responseStatusCode,
         responseHeaders,
-        remixContext
+        remixContext,
       );
-}
+export default handleRequest;
 
-function handleBotRequest(
+const handleBotRequest = (
   request: Request,
   responseStatusCode: number,
   responseHeaders: Headers,
-  remixContext: EntryContext
-) {
-  return new Promise((resolve, reject) => {
-    let shellRendered = false;
+  remixContext: EntryContext,
+) =>
+  new Promise((resolve, reject) => {
+    let didError = false;
+    const emotionCache = createEmotionCache({ key: "css" });
+
     const { pipe, abort } = renderToPipeableStream(
-      <RemixServer
-        context={remixContext}
-        url={request.url}
-        abortDelay={ABORT_DELAY}
-      />,
+      <EmotionCacheProvider value={emotionCache}>
+        <RemixServer context={remixContext} url={request.url} />
+      </EmotionCacheProvider>,
       {
-        onAllReady() {
-          shellRendered = true;
-          const body = new PassThrough();
-          const stream = createReadableStreamFromReadable(body);
+        onAllReady: () => {
+          const reactBody = new PassThrough();
+          const emotionServer = createEmotionServer(emotionCache);
+
+          const bodyWithStyles = emotionServer.renderStylesToNodeStream();
+          reactBody.pipe(bodyWithStyles);
 
           responseHeaders.set("Content-Type", "text/html");
 
           resolve(
-            new Response(stream, {
+            new Response(bodyWithStyles, {
               headers: responseHeaders,
-              status: responseStatusCode,
-            })
+              status: didError ? 500 : responseStatusCode,
+            }),
           );
 
-          pipe(body);
+          pipe(reactBody);
         },
-        onShellError(error: unknown) {
+        onShellError: (error: unknown) => {
           reject(error);
         },
-        onError(error: unknown) {
-          responseStatusCode = 500;
-          // Log streaming rendering errors from inside the shell.  Don't log
-          // errors encountered during initial shell rendering since they'll
-          // reject and get logged in handleDocumentRequest.
-          if (shellRendered) {
-            console.error(error);
-          }
+        onError: (error: unknown) => {
+          didError = true;
+
+          console.error(error);
         },
-      }
+      },
     );
 
     setTimeout(abort, ABORT_DELAY);
   });
-}
 
-function handleBrowserRequest(
+const handleBrowserRequest = (
   request: Request,
   responseStatusCode: number,
   responseHeaders: Headers,
-  remixContext: EntryContext
-) {
-  return new Promise((resolve, reject) => {
-    let shellRendered = false;
+  remixContext: EntryContext,
+) =>
+  new Promise((resolve, reject) => {
+    let didError = false;
+    const emotionCache = createEmotionCache({ key: "css" });
+
     const { pipe, abort } = renderToPipeableStream(
-      <RemixServer
-        context={remixContext}
-        url={request.url}
-        abortDelay={ABORT_DELAY}
-      />,
+      <EmotionCacheProvider value={emotionCache}>
+        <RemixServer context={remixContext} url={request.url} />
+      </EmotionCacheProvider>,
       {
-        onShellReady() {
-          shellRendered = true;
-          const body = new PassThrough();
-          const stream = createReadableStreamFromReadable(body);
+        onShellReady: () => {
+          const reactBody = new PassThrough();
+          const emotionServer = createEmotionServer(emotionCache);
+
+          const bodyWithStyles = emotionServer.renderStylesToNodeStream();
+          reactBody.pipe(bodyWithStyles);
 
           responseHeaders.set("Content-Type", "text/html");
 
           resolve(
-            new Response(stream, {
+            new Response(bodyWithStyles, {
               headers: responseHeaders,
-              status: responseStatusCode,
-            })
+              status: didError ? 500 : responseStatusCode,
+            }),
           );
 
-          pipe(body);
+          pipe(reactBody);
         },
-        onShellError(error: unknown) {
+        onShellError: (error: unknown) => {
           reject(error);
         },
-        onError(error: unknown) {
-          responseStatusCode = 500;
-          // Log streaming rendering errors from inside the shell.  Don't log
-          // errors encountered during initial shell rendering since they'll
-          // reject and get logged in handleDocumentRequest.
-          if (shellRendered) {
-            console.error(error);
-          }
+        onError: (error: unknown) => {
+          didError = true;
+
+          console.error(error);
         },
-      }
+      },
     );
 
     setTimeout(abort, ABORT_DELAY);
   });
-}
