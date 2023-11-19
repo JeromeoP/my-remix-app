@@ -2,7 +2,11 @@ import React, { FormEvent } from 'react';
 import { Box, Button, FormControl, FormLabel, Input, useToast } from '@chakra-ui/react';
 
 interface FormData {
-  name: string;
+  firstName: string;
+  lastName: string;
+  adress: string;
+  zipCode: string;
+  city: string;
   message: string;
 }
 
@@ -12,18 +16,28 @@ export default function SubmitForm() {
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
     const target = event.target as typeof event.target & {
-      name: { value: string };
+      firstName: { value: string };
+      lastName: { value: string };
+      address: { value: string };
+      zipCode: { value: string };
+      city: { value: string };
+
       message: { value: string };
     };
 
     const data: FormData = {
-      name: target.name.value,
+      firstName: target.firstName.value,
+      lastName: target.lastName.value,
+      address: target.address.value,
+      zipCode: target.zipCode.value,
+      city: target.city.value,
+
       message: target.message.value,
     };
 
     try {
-      const response = await fetch('/api/submit', {
-        method: 'POST',
+        const response = await fetch('http://localhost:3001/api/submit', {
+            method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
@@ -54,8 +68,24 @@ export default function SubmitForm() {
     <Box p={5}>
       <form onSubmit={handleSubmit}>
         <FormControl isRequired>
-          <FormLabel htmlFor='name'>Name</FormLabel>
-          <Input id='name' type='text' name='name' />
+          <FormLabel htmlFor='firstName'>First name</FormLabel>
+          <Input id='firstName' type='text' name='firstName' />
+        </FormControl>
+        <FormControl isRequired>
+          <FormLabel htmlFor='lastName'>Last name</FormLabel>
+          <Input id='lastName' type='text' name='lastName' />
+        </FormControl>
+        <FormControl isRequired>
+          <FormLabel htmlFor='address'>Address</FormLabel>
+          <Input id='address' type='text' name='address' />
+        </FormControl>
+        <FormControl isRequired>
+          <FormLabel htmlFor='zipCode'>Zip code</FormLabel>
+          <Input id='zipCode' type='text' name='zipCode' />
+        </FormControl>
+        <FormControl isRequired>
+          <FormLabel htmlFor='city'>City</FormLabel>
+          <Input id='city' type='text' name='city' />
         </FormControl>
 
         <FormControl mt={4} isRequired>

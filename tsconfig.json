@@ -5,7 +5,10 @@
     "isolatedModules": true,
     "esModuleInterop": true,
     "jsx": "react-jsx",
-    "moduleResolution": "Bundler",
+    "module": "commonjs",      // CommonJS modules for Node.js
+    "outDir": "./dist",        // Where to output compiled JS files
+
+    "moduleResolution": "node",
     "resolveJsonModule": true,
     "target": "ES2022",
     "strict": true,
@@ -15,7 +18,6 @@
     "paths": {
       "~/*": ["./app/*"]
     },
-
     // Remix takes care of building everything in `remix build`.
     "noEmit": true
   }
