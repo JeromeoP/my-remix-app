@@ -1,15 +1,17 @@
+
 import express, { Express } from 'express';
 import submitRoute from './routes/api/submit';
-import cors from 'cors';
-import dotenv from 'dotenv';
+import generatePDFRoute from './routes/api/generatePDF';
 
-dotenv.config();
+import cors from 'cors';
 
 const app: Express = express();
 app.use(cors());
 
+
 app.use(express.json());
 app.use('/api/submit', submitRoute);
+app.use('/api/generate-pdf', generatePDFRoute);
 
 // other configurations...
 
