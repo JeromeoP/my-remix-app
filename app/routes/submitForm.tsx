@@ -1,8 +1,10 @@
 import React, { FormEvent, useState } from 'react';
 import { Box, Button, Flex, FormControl, FormLabel, Heading, Input, useToast } from '@chakra-ui/react';
 import 'react-datepicker/dist/react-datepicker.css';
+import { ExperienceForm } from '~/components/experienceForm';
+import { EducationForm } from '~/components/educationForm';
 
-interface Education {
+export interface Education {
   fromYear: string;
   toYear: string;
   title: string;
@@ -10,7 +12,7 @@ interface Education {
   city: string;
 }
 
-interface FormData {
+export interface FormData {
   firstName: string;
   lastName: string;
   address: string;
@@ -23,7 +25,7 @@ interface FormData {
   message: string;
 }
 
-interface Experience {
+export interface Experience {
   startDate: string;
   endDate: string;
   company: string;
@@ -202,107 +204,25 @@ if (pdfResponse.ok) {
           <Input id='message' type='text' name='message' />
         </FormControl>
 
-          {
-    experiences.map((experience, index) => (
-      <Box key={index} mt={4}>
-        {index === 0 && <Heading size="md" mb={4}>Experience</Heading>}
-        <Flex gap={4}>
-          <FormControl isRequired>
-            <FormLabel htmlFor={`startDate-${index}`}>From</FormLabel>
-            <Input
-              id={`startDate-${index}`}
-              type="date"
-              value={experience.startDate}
-              onChange={(e) => handleExperienceChange(index, 'startDate', e.target.value)}
-            />
-          </FormControl>
-          <FormControl isRequired>
-            <FormLabel htmlFor={`endDate-${index}`}>To</FormLabel>
-            <Input
-              id={`endDate-${index}`}
-              type="date"
-              value={experience.endDate}
-              onChange={(e) => handleExperienceChange(index, 'endDate', e.target.value)}
-            />
-          </FormControl>
-        </Flex>
-        <FormControl isRequired>
-          <FormLabel htmlFor={`company-${index}`}>Company Name</FormLabel>
-          <Input
-            id={`company-${index}`}
-            type="text"
-            value={experience.company}
-            onChange={(e) => handleExperienceChange(index, 'company', e.target.value)}
+        {experiences.map((experience, index) => (
+          <ExperienceForm
+            key={index}
+            experience={experience}
+            onExperienceChange={handleExperienceChange}
+            index={index}
           />
-        </FormControl>
-        <FormControl isRequired>
-          <FormLabel htmlFor={`description-${index}`}>Brief Description</FormLabel>
-          <Input
-            id={`description-${index}`}
-            type="text"
-            value={experience.description}
-            onChange={(e) => handleExperienceChange(index, 'description', e.target.value)}
-          />
-        </FormControl>
-      </Box>
-    ))
-  }
+        ))}
   <Button mt={4} colorScheme="blue" onClick={handleAddExperience}>
     Add Another Experience
   </Button>    
-  {/* Education Section */}
-{educations.map((education, index) => (
-  <Box key={index} mt={4}>
-    {index === 0 && <Heading size="md" mb={4}>Education</Heading>}
-    <Flex gap={4}>
-      <FormControl isRequired>
-        <FormLabel htmlFor={`fromYear-${index}`}>From Year</FormLabel>
-        <Input
-          id={`fromYear-${index}`}
-          type="date"
-          value={education.fromYear}
-          onChange={(e) => handleEducationChange(index, 'fromYear', e.target.value)}
-        />
-      </FormControl>
-      <FormControl isRequired>
-        <FormLabel htmlFor={`toYear-${index}`}>To Year</FormLabel>
-        <Input
-          id={`toYear-${index}`}
-          type="date"
-          value={education.toYear}
-          onChange={(e) => handleEducationChange(index, 'toYear', e.target.value)}
-        />
-      </FormControl>
-    </Flex>
-    <FormControl isRequired>
-      <FormLabel htmlFor={`title-${index}`}>Title of Education</FormLabel>
-      <Input
-        id={`title-${index}`}
-        type="text"
-        value={education.title}
-        onChange={(e) => handleEducationChange(index, 'title', e.target.value)}
-      />
-    </FormControl>
-    <FormControl isRequired>
-      <FormLabel htmlFor={`university-${index}`}>University Name</FormLabel>
-      <Input
-        id={`university-${index}`}
-        type="text"
-        value={education.university}
-        onChange={(e) => handleEducationChange(index, 'university', e.target.value)}
-      />
-    </FormControl>
-    <FormControl isRequired>
-      <FormLabel htmlFor={`city-${index}`}>City</FormLabel>
-      <Input
-        id={`city-${index}`}
-        type="text"
-        value={education.city}
-        onChange={(e) => handleEducationChange(index, 'city', e.target.value)}
-      />
-    </FormControl>
-  </Box>
-))}
+  {educations.map((education, index) => (
+          <EducationForm
+            key={index}
+            education={education}
+            onEducationChange={handleEducationChange}
+            index={index}
+          />
+        ))}
 <Button mt={4} colorScheme="blue" onClick={handleAddEducation}>
   Add Another Education
 </Button>

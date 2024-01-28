@@ -1,9 +1,14 @@
-import { Box } from "@chakra-ui/react";
+import React from "react";
+import CallToActionWithAnnotation from "../components/heroSection"
+import Navbar from "~/components/navbar";
 
 export default function Index() {
   return (
-    <Box bg="tomato" w="100%" p={4} color="white">
-      Hello World!
-    </Box>
+    <>
+      <Navbar />
+      <CallToActionWithAnnotation />
+      </>
   );
 }
+
+

@@ -10,10 +10,12 @@ dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
 interface ENV {
     OPENAI_API_KEY: string | undefined;
+    MONGODB_URI: string | undefined;
 }
 
 interface Config {
   OPENAI_API_KEY: string;
+  MONGODB_URI: string;
 }
 
 // Loading process.env as ENV interface
@@ -21,6 +23,7 @@ interface Config {
 const getConfig = (): ENV => {
   return {
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+    MONGODB_URI: process.env.MONGODB_URI,
   };
 };
 
